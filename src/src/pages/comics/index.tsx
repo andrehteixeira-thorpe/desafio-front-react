@@ -6,6 +6,7 @@ import CardComics from "../../components/CardComics";
 import Title from '../../components/Title';
 import Loading from '../../components/Loading';
 import Pagination from '../../components/Pagination';
+import Message from '../../components/Message';
 import DatePicker from 'react-datepicker';
 import format from 'date-fns/format';
 import isAfter from 'date-fns/isAfter';
@@ -38,6 +39,7 @@ export default function Comics() {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [dateRange, setDateRange] = useState('');
+  const [txtError, setTxtError] = useState('');
 
   useEffect(() => {
     GetComics();
@@ -76,6 +78,9 @@ export default function Comics() {
     })
     .catch(error => {
       console.log(error);
+      if(error.request.status === 429){
+        setTxtError('You have exceeded your rate limit in marvel API. Please try again later')
+      }
       setLoading(false);
     })
   }
@@ -117,19 +122,25 @@ export default function Comics() {
       ) : (
         <div className="album py-5 bg-light">
           <div className="container">
-          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-              {comics.map(comic => {
-                return(
-                  <CardComics 
-                    key={comic.id} 
-                    id={comic.id}
-                    title={comic.title} 
-                    thumbnail={comic.thumbnail.path}
-                    thumbnailExtension={comic.thumbnail.extension}
-                  />
-                );  
-              })}
-            </div>
+            {txtError ? (
+              <>
+                <Message text={txtError}/>
+              </>
+            ) : (
+              <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                {comics.map(comic => {
+                  return(
+                    <CardComics 
+                      key={comic.id} 
+                      id={comic.id}
+                      title={comic.title} 
+                      thumbnail={comic.thumbnail.path}
+                      thumbnailExtension={comic.thumbnail.extension}
+                    />
+                  );  
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
